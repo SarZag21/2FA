@@ -44,3 +44,53 @@ export const actions = {
                 error: 'E-Mail oder Passwort ist falsch.'
             });
         }
+            // 6-stelligen 2FA-Code erzeugen
+        const verificationCode =
+            crypto.randomInt(100000, 1000000).toString();
+
+        // Code hashen
+        const verificationHash = sha256(verificationCode);
+
+        // Zufällige ID für diesen Login-Versuch erzeugen
+        const requestToken =
+            crypto.randomBytes(32).toString('hex');
+
+        const requestHash = sha256(requestToken);
+
+        // Code ist 5 Minuten gültig
+        const validUntil =
+            new Date(Date.now() + 5 * 60 * 1000);
+
+        // 2FA-Anfrage in der Datenbank speichern
+        await pool.execute(
+            `INSERT INTO verification_codes
+                (
+                    account_id,
+                    request_hash,
+                    verification_hash,
+                    valid_until
+                )
+             VALUES (?, ?, ?, ?)`,
+            [
+                account.account_id,
+                requestHash,
+                verificationHash,
+                validUntil
+            ]
+        );
+
+        // Nur für unsere Demo:
+        console.log('2FA-Code:', verificationCode);
+
+        // Login-Versuch im Browser merken
+        cookies.set('verification_request', requestToken, {
+            path: '/',
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: false,
+            maxAge: 300
+        });
+
+        throw redirect(303, '/verify');
+    }
+};
