@@ -1,6 +1,15 @@
 import { redirect } from '@sveltejs/kit';
+import pool from '$lib/server/database.js';
+import crypto from 'crypto';
+
+function sha256(value) {
+    return crypto
+        .createHash('sha256')
+        .update(value)
+        .digest('hex');
+}
  
-export function load({ cookies }) {
+export async function load({ cookies }) {
 
     const sessionToken = cookies.get('session_token');
  
@@ -10,5 +19,24 @@ export function load({ cookies }) {
 
     }
 
+
+    const sessionHash = sha256(sessionToken);
+
+const [sessions] = await pool.execute(
+    `SELECT *
+     FROM user_sessions
+     WHERE session_hash = ?`,
+    [sessionHash]
+);
+
+if (sessions.length === 0) {
+    cookies.delete('session_token', {
+        path: '/'
+    });
+
+    throw redirect(303, '/');
+}
+
+const session = sessions[0];
 }
  
