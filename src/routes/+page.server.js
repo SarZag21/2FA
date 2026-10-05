@@ -4,6 +4,9 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { fail, redirect } from '@sveltejs/kit';
 
+
+// Convert a value into a SHA-256 hash so the original value
+// does not need to be stored directly in the database
 function sha256(value) {
     return crypto
         .createHash('sha256')
@@ -13,12 +16,14 @@ function sha256(value) {
 
 export const actions = {
     default: async ({ request, cookies }) => {
+
+        // Read the email and password entered in the login form
         const formData = await request.formData();
 
         const email = formData.get('email');
         const password = formData.get('password');
 
-        // Benutzer anhand der E-Mail suchen
+       // Search for an account with the entered email        
         const [accounts] = await pool.execute(
             `SELECT *
              FROM accounts
@@ -26,43 +31,48 @@ export const actions = {
             [email]
         );
 
+         // Return an error if the account does not exist
         if (accounts.length === 0) {
             return fail(400, {
                 error: 'E-Mail oder Passwort ist falsch.'
             });
         }
 
+        // Get the account data from the database result
         const account = accounts[0];
 
-        // Passwort überprüfen
+        // Compare the entered password with the password hash in the database
         const passwordCorrect = await bcrypt.compare(
             password,
             account.password_hash
         );
 
+         // Return an error if the password is incorrect
         if (!passwordCorrect) {
             return fail(400, {
                 error: 'E-Mail oder Passwort ist falsch.'
             });
         }
-            // 6-stelligen 2FA-Code erzeugen
+        
+        // Generate a random 6-digit verification code
         const verificationCode =
             crypto.randomInt(100000, 1000000).toString();
 
-        // Code hashen
+        // Hash the verification code before storing it in the database
         const verificationHash = sha256(verificationCode);
 
-        // Zufällige ID für diesen Login-Versuch erzeugen
+       // Generate a random token for this verification request
         const requestToken =
             crypto.randomBytes(32).toString('hex');
 
+        // Hash the request token before storing it in the database
         const requestHash = sha256(requestToken);
 
-        // Code ist 5 Minuten gültig
+        // Make the verification code valid for 5 minutes
         const validUntil =
             new Date(Date.now() + 5 * 60 * 1000);
 
-        // 2FA-Anfrage in der Datenbank speichern
+      // Save the verification request and the hashed code in the database
         await pool.execute(
             `INSERT INTO verification_codes
                 (
@@ -80,12 +90,14 @@ export const actions = {
             ]
         );
 
+        // Send the original 6-digit verification code to the user's email
       await sendVerificationEmail(
-    account.email,
-    verificationCode
-);
+        account.email,
+        verificationCode
+      );
 
-        // Login-Versuch im Browser merken
+      // Store the verification request token in a browser cookie
+      // so the verification page knows which login attempt belongs to the user
         cookies.set('verification_request', requestToken, {
             path: '/',
             httpOnly: true,
