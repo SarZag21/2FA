@@ -38,5 +38,22 @@ if (sessions.length === 0) {
 }
 
 const session = sessions[0];
+
+// Prüfen, ob die Session abgelaufen ist
+if (new Date(session.valid_until) < new Date()) {
+ 
+    await pool.execute(
+        `DELETE FROM user_sessions
+         WHERE session_id = ?`,
+        [session.session_id]
+    );
+ 
+    cookies.delete('session_token', {
+        path: '/'
+    });
+ 
+    throw redirect(303, '/');
+}
+
 }
  
