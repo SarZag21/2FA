@@ -59,6 +59,12 @@ if (new Date(verification.valid_until) < new Date()) {
     });
 }
 
+if (verification.failed_attempts >= 5) {
+    return fail(429, {
+        error: 'Zu viele falsche Versuche.'
+    });
+}
+
 
         return {
             success: true
