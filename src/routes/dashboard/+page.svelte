@@ -23,7 +23,17 @@
     <p class="text-sm font-medium text-slate-700">
         Du bist jetzt sicher angemeldet.
     </p>
+
+    <a
+    href="/logout"
+    class="mt-6 inline-block rounded-lg bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+>
+    Abmelden
+</a>
+
 </div>
+
+
 
     </div>
 
