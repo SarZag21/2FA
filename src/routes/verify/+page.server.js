@@ -65,6 +65,24 @@ if (verification.failed_attempts >= 5) {
     });
 }
 
+// Eingegebenen Code hashen
+const enteredCodeHash = sha256(code);
+ 
+// Code mit gespeichertem Hash vergleichen
+if (enteredCodeHash !== verification.verification_hash) {
+ 
+    await pool.execute(
+        `UPDATE verification_codes
+         SET failed_attempts = failed_attempts + 1
+         WHERE verification_id = ?`,
+        [verification.verification_id]
+    );
+ 
+    return fail(400, {
+        error: 'Der Sicherheitscode ist falsch.'
+    });
+}
+
 
         return {
             success: true
