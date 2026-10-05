@@ -50,7 +50,14 @@ if (verificationRequests.length === 0) {
     });
 }
 
+
 const verification = verificationRequests[0];
+
+if (new Date(verification.valid_until) < new Date()) {
+    return fail(400, {
+        error: 'Der Sicherheitscode ist abgelaufen.'
+    });
+}
 
 
         return {
