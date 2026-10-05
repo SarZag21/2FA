@@ -1,4 +1,13 @@
 import { fail, redirect } from '@sveltejs/kit';
+import pool from '$lib/server/database.js';
+import crypto from 'crypto';
+
+function sha256(value) {
+    return crypto
+        .createHash('sha256')
+        .update(value)
+        .digest('hex');
+}
 
 export function load({ cookies }) {
     const requestToken = cookies.get('verification_request');
@@ -9,7 +18,7 @@ export function load({ cookies }) {
 }
 
 export const actions = {
-    default: async ({ request }) => {
+    default: async ({ request, cookies }) => {
         const formData = await request.formData();
 
         const code = formData.get('code')?.toString();
@@ -19,6 +28,30 @@ export const actions = {
                 error: 'Bitte gib einen gültigen 6-stelligen Code ein.'
             });
         }
+
+        const requestToken = cookies.get('verification_request');
+
+if (!requestToken) {
+    throw redirect(303, '/');
+}
+
+const requestHash = sha256(requestToken);
+
+const [verificationRequests] = await pool.execute(
+    `SELECT *
+     FROM verification_codes
+     WHERE request_hash = ?`,
+    [requestHash]
+);
+
+if (verificationRequests.length === 0) {
+    return fail(400, {
+        error: 'Die Verifizierungsanfrage wurde nicht gefunden.'
+    });
+}
+
+const verification = verificationRequests[0];
+
 
         return {
             success: true
