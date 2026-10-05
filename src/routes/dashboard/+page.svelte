@@ -14,6 +14,17 @@
             Anmeldung erfolgreich
         </h1>
 
+
+        <p class="mt-3 text-sm leading-6 text-slate-500">
+    Die Zwei-Faktor-Authentifizierung wurde erfolgreich abgeschlossen.
+</p>
+
+<div class="mt-8 rounded-xl bg-slate-50 p-4">
+    <p class="text-sm font-medium text-slate-700">
+        Du bist jetzt sicher angemeldet.
+    </p>
+</div>
+
     </div>
 
 </div>
