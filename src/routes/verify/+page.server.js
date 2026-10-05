@@ -83,6 +83,31 @@ if (enteredCodeHash !== verification.verification_hash) {
     });
 }
 
+// Session-Token erzeugen
+const sessionToken = crypto.randomBytes(32).toString('hex');
+
+// Session-Token hashen
+const sessionHash = sha256(sessionToken);
+
+// Session ist 24 Stunden gültig
+const sessionValidUntil =
+    new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+// Session in der Datenbank speichern
+await pool.execute(
+    `INSERT INTO user_sessions
+        (
+            account_id,
+            session_hash,
+            valid_until
+        )
+     VALUES (?, ?, ?)`,
+    [
+        verification.account_id,
+        sessionHash,
+        sessionValidUntil
+    ]
+);
 
         return {
             success: true
