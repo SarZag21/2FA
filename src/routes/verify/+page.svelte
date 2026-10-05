@@ -36,7 +36,13 @@
         />
     </div>
 
+    <button type="submit" class="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700">Code bestätigen</button>
+
 </form>
+
+<div class="mt-8 border-t border-slate-200 pt-5 text-center text-xs text-slate-500">
+    Der Sicherheitscode ist 5 Minuten gültig.
+</div>
 
     </div>
 
