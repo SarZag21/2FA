@@ -1,4 +1,5 @@
 import pool from '$lib/server/database.js';
+import { sendVerificationEmail } from '$lib/server/email.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { fail, redirect } from '@sveltejs/kit';
@@ -79,8 +80,10 @@ export const actions = {
             ]
         );
 
-        // Nur für unsere Demo:
-        console.log('2FA-Code:', verificationCode);
+      await sendVerificationEmail(
+    account.email,
+    verificationCode
+);
 
         // Login-Versuch im Browser merken
         cookies.set('verification_request', requestToken, {
