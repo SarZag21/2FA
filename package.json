@@ -33,6 +33,7 @@
 	},
 	"dependencies": {
 		"bcrypt": "^6.0.0",
-		"mysql2": "^3.24.5"
+		"mysql2": "^3.24.5",
+		"nodemailer": "^10.0.14"
 	}
 }
