@@ -109,8 +109,21 @@ await pool.execute(
     ]
 );
 
-        return {
-            success: true
-        };
+        // Session-Token im Browser speichern
+cookies.set('session_token', sessionToken, {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: false,
+    maxAge: 60 * 60 * 24
+});
+ 
+// Verifizierungs-Cookie löschen
+cookies.delete('verification_request', {
+    path: '/'
+});
+ 
+// Zum Dashboard weiterleiten
+throw redirect(303, '/dashboard');
     }
 };
