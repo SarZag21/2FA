@@ -1,3 +1,6 @@
+<script>
+    let { form } = $props();
+</script>
 <svelte:head>
     <title>2FA Verification</title>
 </svelte:head>
@@ -17,6 +20,13 @@
 
      <!-- Form for entering the 2FA code -->
         <form method="POST" class="mt-8 space-y-5">
+
+<!-- Show an error message if the verification fails -->
+{#if form?.error}
+    <div class="rounded-lg bg-red-50 px-4 py-3 text-center text-sm text-red-700">
+        {form.error}
+    </div>
+{/if}
 
     <div>
 
